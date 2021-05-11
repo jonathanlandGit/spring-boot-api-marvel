@@ -15,7 +15,6 @@ pipeline {
                 sh './gradlew assemble'
             }
         }
-        //commenting this for now
 //         stage('Test') {
 //             steps {
 //                 sh './gradlew test'
@@ -23,7 +22,7 @@ pipeline {
 //         }
         stage('Build Docker image') {
             steps {
-                sh './gradlew docker --stacktrace'
+                sh './gradlew docker'
             }
         }
         stage('Push Docker image') {
@@ -32,7 +31,17 @@ pipeline {
             }
             steps {
                 sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW'
-                sh './gradlew dockerPush'
+                sh './gradlew dockerPush -PdockerHubUsername=$DOCKER_HUB_LOGIN_USR'
+            }
+        }
+        stage('Deploy to AWS') {
+            environment {
+                DOCKER_HUB_LOGIN = credentials('docker-hub')
+            }
+            steps {
+                withAWS(credentials: 'aws-credentials', region: env.AWS_REGION) {
+                    sh './gradlew awsCfnMigrateStack awsCfnWaitStackComplete -PsubnetId=$SUBNET_ID -PdockerHubUsername=$DOCKER_HUB_LOGIN_USR -Pregion=$AWS_REGION'
+                }
             }
         }
     }
