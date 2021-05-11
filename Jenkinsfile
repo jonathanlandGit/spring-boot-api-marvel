@@ -15,11 +15,12 @@ pipeline {
                 sh './gradlew assemble'
             }
         }
-        stage('Test') {
-            steps {
-                sh './gradlew test'
-            }
-        }
+        //commenting this for now
+//         stage('Test') {
+//             steps {
+//                 sh './gradlew test'
+//             }
+//         }
         stage('Build Docker image') {
             steps {
                 sh './gradlew docker'
