@@ -1,15 +1,18 @@
 plugins {
     id 'java'
     id 'io.spring.dependency-management' version "1.0.9.RELEASE"
-    id 'org.springframework.boot' version '2.2.5.RELEASE'
+//    id 'org.springframework.boot' version '2.2.5.RELEASE'
+    id 'org.springframework.boot' version '2.3.1.RELEASE'
     id 'pl.allegro.tech.build.axion-release' version '1.10.1'
     id 'com.palantir.docker' version '0.25.0'
     id 'com.palantir.docker-run' version '0.25.0'
     id 'jp.classmethod.aws.cloudformation' version '0.41'
 }
 
-version = scmVersion.version
-sourceCompatibility = 11
+//version = scmVersion.version
+// sourceCompatibility = 11
+sourceCompatibility = 8
+
 
 repositories {
     mavenCentral()
@@ -25,6 +28,8 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
@@ -33,13 +38,22 @@ test {
     useJUnitPlatform()
 }
 
-String dockerHubUsernameProperty = findProperty('dockerHubUsername') ?: 'jonathanland1010'
-String imageName = "${dockerHubUsernameProperty}/spring-boot-api-marvel:$version"
+//String dockerHubUsernameProperty = findProperty('dockerHubUsername') ?: 'jonathanland1010'
+//String imageName = "${dockerHubUsernameProperty}/spring-boot-api-marvel:$version"
+
+//String imageName = "springbootapp:$version"
+
+String imageName = "angular-service:latest"
+
 
 docker {
     name imageName
     files "build/libs/${bootJar.archiveFileName.get()}"
     buildArgs([JAR_FILE: bootJar.archiveFileName.get()])
+}
+
+bootBuildImage{
+    imageName=imageName
 }
 
 dockerRun {
@@ -49,19 +63,19 @@ dockerRun {
     clean true
 }
 
-import com.amazonaws.services.cloudformation.model.Capability
+//import com.amazonaws.services.cloudformation.model.Capability
 
-aws {
-    region = findProperty('region') ?: 'us-east-1'
-}
-
-cloudFormation {
-    stackName "$project.name-stack"
-    stackParams([
-            SubnetID: findProperty('subnetId') ?: '',
-            ServiceName: project.name,
-            ServiceVersion: project.version,
-            DockerHubUsername: dockerHubUsernameProperty
-    ])
-    templateFile project.file("ecs.yml")
-}
+//aws {
+//    region = findProperty('region') ?: 'us-east-1'
+//}
+//
+//cloudFormation {
+//    stackName "$project.name-stack"
+//    stackParams([
+//            SubnetID: findProperty('subnetId') ?: '',
+//            ServiceName: project.name,
+//            ServiceVersion: project.version,
+//            DockerHubUsername: dockerHubUsernameProperty
+//    ])
+//    templateFile project.file("ecs.yml")
+//}
